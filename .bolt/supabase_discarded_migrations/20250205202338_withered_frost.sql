@@ -1,0 +1,68 @@
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
+  reset_token VARCHAR(64),
+  reset_expires DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Articles table
+CREATE TABLE IF NOT EXISTS articles (
+  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  user_id VARCHAR(36) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  sections JSON NOT NULL,
+  images JSON,
+  status ENUM('draft', 'processing', 'completed', 'rejected') DEFAULT 'draft',
+  wordpress_draft BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Images table
+CREATE TABLE IF NOT EXISTS images (
+  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  user_id VARCHAR(36) NOT NULL,
+  article_id VARCHAR(36),
+  url TEXT NOT NULL,
+  folder VARCHAR(255) DEFAULT 'article_images',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
+);
+
+-- Keywords table
+CREATE TABLE IF NOT EXISTS keywords (
+  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  user_id VARCHAR(36) NOT NULL,
+  keyword VARCHAR(255) NOT NULL,
+  volume INT DEFAULT 0,
+  position INT DEFAULT 0,
+  change INT DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY user_keyword (user_id, keyword)
+);
+
+-- Pins table
+CREATE TABLE IF NOT EXISTS pins (
+  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  user_id VARCHAR(36) NOT NULL,
+  article_id VARCHAR(36) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  image TEXT NOT NULL,
+  interests JSON,
+  status ENUM('pending', 'processing', 'completed', 'rejected') DEFAULT 'pending',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
+);
