@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from './supabase.ts'; //.ts extension
+import { supabase } from './supabase';
 
 interface ImageStore {
   images: {

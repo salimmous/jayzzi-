@@ -9,8 +9,7 @@ import {
   Tag,
   Settings,
   X,
-  BarChart,
-  Calendar as CalendarIcon, // Rename the Calendar icon
+  BarChart
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -37,8 +36,7 @@ const sidebarItems: SidebarItem[] = [
   { icon: <Search size={20} />, label: 'Keyword Research', path: '/keywords/research' },
   { icon: <Tag size={20} />, label: 'Keyword Tracker', path: '/keywords/tracker' },
   { icon: <Settings size={20} />, label: 'Settings', path: '/settings' },
-  { icon: <BarChart size={20} />, label: 'Analytics', path: '/analytics' },
-  { icon: <CalendarIcon size={20} />, label: 'Calendar', path: '/calendar' }, // Add Calendar link
+  { icon: <BarChart size={20} />, label: 'Analytics', path: '/analytics' }, // Add Analytics
 ];
 
 interface LayoutProps {

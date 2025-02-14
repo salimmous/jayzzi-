@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { supabase } from './supabase.ts'; // .ts extension
-import { useSettingsStore } from './settings.ts'; // .ts extension
+import { supabase } from './supabase';
+import { useSettingsStore } from './settings';
 
 interface User {
   id: string;

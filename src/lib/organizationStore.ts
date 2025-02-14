@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from './supabase.ts';
+import { supabase } from './supabase';
 
 interface Organization {
   id: string;
@@ -54,12 +54,12 @@ export const useOrganizationStore = create<OrganizationStore>((set, get) => ({
 
       if (error) throw error;
 
-      set({
+      set({ 
         organizations: data,
         currentOrganization: data[0] || null
       });
-    } catch (error:any) {
-      set({ error: error.message });
+    } catch (error) {
+      set({ error: (error as Error).message });
     } finally {
       set({ loading: false });
     }
@@ -77,8 +77,8 @@ export const useOrganizationStore = create<OrganizationStore>((set, get) => ({
       if (error) throw error;
 
       await get().fetchOrganizations();
-    } catch (error:any) {
-      set({ error: error.message });
+    } catch (error) {
+      set({ error: (error as Error).message });
     } finally {
       set({ loading: false });
     }
@@ -105,8 +105,8 @@ export const useOrganizationStore = create<OrganizationStore>((set, get) => ({
       if (error) throw error;
 
       await get().fetchMembers();
-    } catch (error:any) {
-      set({ error: error.message });
+    } catch (error) {
+      set({ error: (error as Error).message });
     } finally {
       set({ loading: false });
     }
@@ -118,7 +118,7 @@ export const useOrganizationStore = create<OrganizationStore>((set, get) => ({
       const { error } = await supabase
         .from('organization_members')
         .delete()
-        .match({
+        .match({ 
           organization_id: get().currentOrganization?.id,
           user_id: userId
         });
@@ -126,8 +126,8 @@ export const useOrganizationStore = create<OrganizationStore>((set, get) => ({
       if (error) throw error;
 
       await get().fetchMembers();
-    } catch (error:any) {
-      set({ error: error.message });
+    } catch (error) {
+      set({ error: (error as Error).message });
     } finally {
       set({ loading: false });
     }
@@ -139,7 +139,7 @@ export const useOrganizationStore = create<OrganizationStore>((set, get) => ({
       const { error } = await supabase
         .from('organization_members')
         .update({ role })
-        .match({
+        .match({ 
           organization_id: get().currentOrganization?.id,
           user_id: userId
         });
@@ -147,8 +147,8 @@ export const useOrganizationStore = create<OrganizationStore>((set, get) => ({
       if (error) throw error;
 
       await get().fetchMembers();
-    } catch (error:any) {
-      set({ error: error.message });
+    } catch (error) {
+      set({ error: (error as Error).message });
     } finally {
       set({ loading: false });
     }
@@ -181,8 +181,8 @@ export const useOrganizationStore = create<OrganizationStore>((set, get) => ({
           name: member.profiles.name
         }))
       });
-    } catch (error:any) {
-      set({ error: error.message });
+    } catch (error) {
+      set({ error: (error as Error).message });
     } finally {
       set({ loading: false });
     }

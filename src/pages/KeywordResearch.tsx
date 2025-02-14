@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { Search, ArrowUpDown, Star, Eye } from 'lucide-react';
-import { keywordApi } from '../lib/keywords.ts';
-import { GoogleKeywordResult } from '../types/index.ts';
 
-type SortField = 'keyword' | 'volume' | 'competition' | 'cpc';
+interface KeywordResult {
+  keyword: string;
+  volume: number;
+  followers: number;
+  popularity: number;
+}
+
+type SortField = 'keyword' | 'volume' | 'followers' | 'popularity';
 
 function KeywordResearch() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,21 +16,11 @@ function KeywordResearch() {
   const [sortField, setSortField] = useState<SortField>('volume');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
-  const [results, setResults] = useState<GoogleKeywordResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<KeywordResult[]>([]);
 
-  const handleSearch = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await keywordApi.searchGoogleKeywords(searchTerm);
-      setResults(data);
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = () => {
+    // Implement keyword search
+    console.log('Searching for:', searchTerm);
   };
 
   const handleSort = (field: SortField) => {
@@ -47,24 +42,11 @@ function KeywordResearch() {
     console.log('Viewing top pins for:', keyword);
   };
 
-    const sortedResults = [...results].sort((a, b) => {
-    const aValue = a[sortField];
-    const bValue = b[sortField];
-
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sortAsc ? aValue - bValue : bValue - aValue;
-    }
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortAsc ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-    }
-    return 0;
-  });
-
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Keyword Research</h1>
-
+        
         <div className="flex space-x-4">
           <div className="relative">
             <input
@@ -79,13 +61,12 @@ function KeywordResearch() {
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
             />
           </div>
-
+          
           <button
             onClick={handleSearch}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            disabled={loading}
           >
-            {loading ? 'Searching...' : 'Search'}
+            Search
           </button>
         </div>
       </div>
@@ -118,8 +99,6 @@ function KeywordResearch() {
         </div>
       </div>
 
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-
       {results.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <table className="min-w-full">
@@ -139,7 +118,7 @@ function KeywordResearch() {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                 </th>
-                {(['keyword', 'volume', 'competition', 'cpc'] as SortField[]).map((field) => (
+                {(['keyword', 'volume', 'followers', 'popularity'] as SortField[]).map((field) => (
                   <th
                     key={field}
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
@@ -159,7 +138,7 @@ function KeywordResearch() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sortedResults.map((result) => (
+              {results.map((result) => (
                 <tr key={result.keyword}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <input
@@ -183,16 +162,16 @@ function KeywordResearch() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {result.volume.toLocaleString()}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {result.followers.toLocaleString()}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="w-24 bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${result.competition * 100}%` }}
+                        style={{ width: `${result.popularity}%` }}
                       />
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${result.cpc.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button

@@ -29,7 +29,6 @@ function ImageGenerator() {
 
   const onSubmit = (data: ImageFormData) => {
     console.log({ ...data, referenceImage: acceptedFiles[0] });
-    // Placeholder: In a real application, you would send this data to an API
   };
 
   return (
@@ -97,7 +96,7 @@ function ImageGenerator() {
         {/* Generation Settings */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Generation Settings</h2>
-
+          
           <div className="space-y-6">
             <div>
               <label className="block mb-2 font-medium">Number of Images</label>

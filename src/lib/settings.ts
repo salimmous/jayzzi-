@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { supabase } from './supabase.ts';
+import { supabase } from './supabase';
 
 interface Settings {
   openaiKey: string;
@@ -11,7 +11,6 @@ interface Settings {
   stabilityKey: string;
   googleAiKey: string;
   replicateKey: string;
-  googleAdsApiKey: string; // New field for Google Ads API key
 }
 
 interface SettingsStore {
@@ -35,18 +34,17 @@ export const useSettingsStore = create<SettingsStore>()(
         anthropicKey: '',
         stabilityKey: '',
         googleAiKey: '',
-        replicateKey: '',
-        googleAdsApiKey: '', // Initialize the new field
+        replicateKey: ''
       },
       loading: false,
       error: null,
 
       validateApiKey: async (key: string, type: keyof Settings) => {
         if (!key.trim()) return true;
-
+        
         try {
           set({ error: null });
-
+          
           switch (type) {
             case 'openaiKey':
               if (!key.startsWith('sk-')) {
@@ -74,18 +72,12 @@ export const useSettingsStore = create<SettingsStore>()(
                 throw new Error('Invalid Replicate API key format. Key should start with "r8_"');
               }
               return true;
-            case 'googleAdsApiKey':
-                // Add basic validation, adjust as needed based on the key format
-                if (key.length < 10) { // Example: Key should be at least 10 characters
-                    throw new Error('Invalid Google Ads API key format.');
-                }
-                return true;
 
             default:
               return true;
           }
-        } catch (error:any) {
-          set({ error: error.message });
+        } catch (error) {
+          set({ error: (error as Error).message });
           return false;
         }
       },
@@ -94,7 +86,7 @@ export const useSettingsStore = create<SettingsStore>()(
         try {
           set({ loading: true, error: null });
           const { data: { user } } = await supabase.auth.getUser();
-
+          
           if (!user) {
             throw new Error('Not authenticated');
           }
@@ -128,8 +120,7 @@ export const useSettingsStore = create<SettingsStore>()(
                   anthropicKey: decryptedSettings.anthropic_key || '',
                   stabilityKey: decryptedSettings.stability_key || '',
                   googleAiKey: decryptedSettings.google_ai_key || '',
-                  replicateKey: decryptedSettings.replicate_key || '',
-                  googleAdsApiKey: decryptedSettings.google_ads_api_key || '', // Load the new key
+                  replicateKey: decryptedSettings.replicate_key || ''
                 }
               });
             }
@@ -144,8 +135,7 @@ export const useSettingsStore = create<SettingsStore>()(
                 anthropicKey: settings.anthropic_key || '',
                 stabilityKey: settings.stability_key || '',
                 googleAiKey: settings.google_ai_key || '',
-                replicateKey: settings.replicate_key || '',
-                googleAdsApiKey: settings.google_ads_api_key || '', // Load the new key
+                replicateKey: settings.replicate_key || ''
               }
             });
           }
@@ -161,7 +151,7 @@ export const useSettingsStore = create<SettingsStore>()(
         try {
           set({ loading: true, error: null });
           const { data: { user } } = await supabase.auth.getUser();
-
+          
           if (!user) {
             throw new Error('Not authenticated');
           }
@@ -215,9 +205,9 @@ export const useSettingsStore = create<SettingsStore>()(
 
           // Reload to ensure consistency
           await get().loadSettings();
-        } catch (error:any) {
+        } catch (error) {
           console.error('Settings update error:', error);
-          set({ error: error.message });
+          set({ error: (error as Error).message });
           throw error;
         } finally {
           set({ loading: false });
@@ -228,7 +218,7 @@ export const useSettingsStore = create<SettingsStore>()(
         try {
           set({ loading: true, error: null });
           const { data: { user } } = await supabase.auth.getUser();
-
+          
           if (!user) {
             throw new Error('Not authenticated');
           }
@@ -249,8 +239,7 @@ export const useSettingsStore = create<SettingsStore>()(
               anthropicKey: '',
               stabilityKey: '',
               googleAiKey: '',
-              replicateKey: '',
-              googleAdsApiKey: '', // Clear the new key
+              replicateKey: ''
             }
           });
         } catch (error) {

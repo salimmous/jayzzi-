@@ -1,4 +1,4 @@
-import { supabase } from './supabase.ts'; // .ts extension
+import { supabase } from './supabase';
 
 export default {
   query: async <T>(sql: string, params?: any[]): Promise<T[]> => {

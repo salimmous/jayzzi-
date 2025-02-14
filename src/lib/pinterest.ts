@@ -1,4 +1,4 @@
-import { supabase } from './supabase.ts';
+import { supabase } from './supabase';
 
 interface PinterestConfig {
   accessToken: string;
@@ -33,57 +33,37 @@ class PinterestAPI {
   }
 
   async searchPins(query: string, limit = 50) {
-    try{
-        return await this.request(`/pins/search?query=${encodeURIComponent(query)}&limit=${limit}`);
-    } catch (error) {
-        console.error("Failed to search pins in Pinterest", error);
-        throw error;
-    }
+    return this.request(`/pins/search?query=${encodeURIComponent(query)}&limit=${limit}`);
   }
 
   async getTopPins(query: string) {
-     try {
-        const response = await this.searchPins(query);
-        return response.items.map((pin: any) => ({
-          id: pin.id,
-          title: pin.title,
-          description: pin.description,
-          link: pin.link,
-          saves: pin.save_count || 0,
-          comments: pin.comment_count || 0,
-          reactions: pin.reaction_counts?.total || 0
-        }));
-    } catch (error){
-        console.error("Failed to get top pins from Pinterest", error);
-        throw error;
-    }
+    const response = await this.searchPins(query);
+    return response.items.map((pin: any) => ({
+      id: pin.id,
+      title: pin.title,
+      description: pin.description,
+      link: pin.link,
+      saves: pin.save_count || 0,
+      comments: pin.comment_count || 0,
+      reactions: pin.reaction_counts?.total || 0
+    }));
   }
 
   async getTrendingKeywords(category?: string) {
-    try {
-        return await this.request(`/trends${category ? `?category=${category}` : ''}`);
-    } catch (error) {
-        console.error("Failed to get trending keywords from Pinterest", error);
-        throw error;
-    }
+    return this.request(`/trends${category ? `?category=${category}` : ''}`);
   }
 
   async getKeywordMetrics(keyword: string) {
-    try {
-        const searchResults = await this.searchPins(keyword, 100);
-        const pins = searchResults.items;
+    const searchResults = await this.searchPins(keyword, 100);
+    const pins = searchResults.items;
 
-        return {
-          volume: pins.length,
-          saves: pins.reduce((acc: number, pin: any) => acc + (pin.save_count || 0), 0),
-          engagement: pins.reduce((acc: number, pin: any) =>
-            acc + (pin.save_count || 0) + (pin.comment_count || 0) + (pin.reaction_counts?.total || 0), 0
-          )
-        };
-    } catch(error) {
-        console.error("Failed to get keyword metrics from Pinterest", error);
-        throw error;
-    }
+    return {
+      volume: pins.length,
+      saves: pins.reduce((acc: number, pin: any) => acc + (pin.save_count || 0), 0),
+      engagement: pins.reduce((acc: number, pin: any) => 
+        acc + (pin.save_count || 0) + (pin.comment_count || 0) + (pin.reaction_counts?.total || 0), 0
+      )
+    };
   }
 }
 
