@@ -1,53 +1,18 @@
-import { supabase } from './supabase';
-import { pinterestApi } from './pinterest';
-
-interface KeywordMetrics {
-  volume: number;
-  saves: number;
-  engagement: number;
-}
+import { supabase } from './supabase.ts';
+import { pinterestApi } from './pinterest.ts';
+import { GoogleKeywordResult } from '../types/index.ts';
+import { useSettingsStore } from './settings.ts';
 
 class KeywordResearchAPI {
-  async searchKeywords(seed: string) {
-    try {
-      // Get Pinterest trending data
-      const trends = await pinterestApi.getTrendingKeywords();
-      
-      // Filter and sort by relevance to seed keyword
-      const relatedKeywords = trends.filter((trend: any) => 
-        trend.term.toLowerCase().includes(seed.toLowerCase())
-      );
-
-      // Get metrics for each keyword
-      const keywordsWithMetrics = await Promise.all(
-        relatedKeywords.map(async (keyword: any) => {
-          const metrics = await pinterestApi.getKeywordMetrics(keyword.term);
-          return {
-            keyword: keyword.term,
-            volume: metrics.volume,
-            saves: metrics.saves,
-            engagement: metrics.engagement,
-            popularity: this.calculatePopularity(metrics)
-          };
-        })
-      );
-
-      return keywordsWithMetrics;
-    } catch (error) {
-      console.error('Keyword research error:', error);
-      throw error;
-    }
-  }
-
-  private calculatePopularity(metrics: KeywordMetrics): number {
+  private calculatePopularity(metrics: { volume: number; saves: number; engagement: number }): number {
     const maxScore = 100;
     const volumeWeight = 0.4;
     const savesWeight = 0.3;
     const engagementWeight = 0.3;
 
-    // Normalize metrics to 0-1 range
-    const normalizedVolume = Math.min(metrics.volume / 1000, 1);
-    const normalizedSaves = Math.min(metrics.saves / 10000, 1);
+    // Normalize metrics (adjust these thresholds as needed)
+    const normalizedVolume = Math.min(metrics.volume / 10000, 1);
+    const normalizedSaves = Math.min(metrics.saves / 20000, 1);
     const normalizedEngagement = Math.min(metrics.engagement / 20000, 1);
 
     // Calculate weighted score
@@ -63,7 +28,7 @@ class KeywordResearchAPI {
   async trackKeyword(keyword: string) {
     try {
       const metrics = await pinterestApi.getKeywordMetrics(keyword);
-      
+
       const { data, error } = await supabase
         .from('keywords')
         .insert({
@@ -81,24 +46,25 @@ class KeywordResearchAPI {
       return data;
     } catch (error) {
       console.error('Failed to track keyword:', error);
-      throw error;
+      throw error; // Re-throw for handling in the UI
     }
   }
 
   async updateKeywordMetrics(keywordId: string) {
     try {
-      const { data: keyword } = await supabase
+      const { data: keyword, error: keywordError } = await supabase
         .from('keywords')
         .select('keyword')
         .eq('id', keywordId)
         .single();
 
+      if (keywordError) throw keywordError;
       if (!keyword) throw new Error('Keyword not found');
 
       const metrics = await pinterestApi.getKeywordMetrics(keyword.keyword);
       const popularity = this.calculatePopularity(metrics);
 
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('keywords')
         .update({
           volume: metrics.volume,
@@ -108,10 +74,65 @@ class KeywordResearchAPI {
         })
         .eq('id', keywordId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
     } catch (error) {
       console.error('Failed to update keyword metrics:', error);
-      throw error;
+      throw error; // Re-throw for handling in the UI
+    }
+  }
+
+  async searchGoogleKeywords(keyword: string): Promise<GoogleKeywordResult[]> {
+    const settings = useSettingsStore.getState().settings;
+    const apiKey = settings.googleAdsApiKey;
+    const customerId = 'YOUR_CUSTOMER_ID'; //  Replace with actual Customer ID or fetch from settings
+
+    if (!apiKey) {
+      throw new Error('Google Ads API key is not set.');
+    }
+    if (!customerId) {
+      throw new Error('Google Ads Customer ID is not set.');
+    }
+
+
+    const url = `https://googleads.googleapis.com/v14/customers/${customerId}:generateKeywordIdeas`; //  Replace with the correct endpoint
+    const headers = {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'developer-token': 'YOUR_DEVELOPER_TOKEN', // Replace with your developer token
+    };
+    const body = JSON.stringify({
+      keywordTexts: [keyword],
+      languageCode: 'en-US', //  Or fetch from settings/user input
+      //  Add other parameters as needed based on the API documentation
+    });
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: body,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Google Ads API error: ${response.status} - ${errorData.error.message}`);
+      }
+
+      const data = await response.json();
+
+      //  Adapt this to the actual response structure from the Google Ads API
+      const results: GoogleKeywordResult[] = data.results.map((item: any) => ({
+        keyword: item.text,
+        volume: item.keywordIdeaMetrics.avgMonthlySearches,
+        competition: item.keywordIdeaMetrics.competition, // This might need mapping to a numerical value
+        cpc: item.keywordIdeaMetrics.averageCpc, // This might need conversion
+      }));
+
+      return results;
+
+    } catch (error:any) {
+      console.error('Failed to fetch Google keywords:', error);
+      throw new Error(`Failed to fetch Google keywords: ${error.message}`);
     }
   }
 }
