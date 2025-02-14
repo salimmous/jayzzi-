@@ -35,11 +35,18 @@ function PinData() {
     console.log('Generating pins for:', selectedArticles);
   };
 
+    const handleView = (articleId: string) => {
+        console.log("View article:", articleId);
+    }
+    const handleDelete = (articleId: string) => {
+        console.log("Delete article:", articleId);
+    }
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Pin Data</h1>
-        
+
         {selectedArticles.length > 0 && (
           <button
             onClick={handleGeneratePins}
@@ -83,7 +90,7 @@ function PinData() {
           <tbody className="bg-white divide-y divide-gray-200">
             {articles.map((article) => {
               const pinStatus = pinStatuses.find(p => p.articleId === article.id);
-              
+
               return (
                 <tr key={article.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -119,11 +126,13 @@ function PinData() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-4">
                       <button
+                        onClick={() => handleView(article.id)}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         <Eye size={20} />
                       </button>
                       <button
+                         onClick={() => handleDelete(article.id)}
                         className="text-red-600 hover:text-red-900"
                       >
                         <Trash2 size={20} />

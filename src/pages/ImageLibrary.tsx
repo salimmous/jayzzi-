@@ -17,7 +17,7 @@ function ImageLibrary() {
   const articles = useArticleStore((state) => state.articles);
 
   // Flatten all images from articles into a single array with metadata
-  const images: ImageItem[] = articles.flatMap(article => 
+  const images: ImageItem[] = articles.flatMap(article =>
     article.images.map((url, index) => ({
       id: `${article.id}-${index}`,
       url,
@@ -44,7 +44,7 @@ function ImageLibrary() {
     const selectedUrls = images
       .filter(img => selectedImages.includes(img.id))
       .map(img => img.url);
-    
+
     useArticleStore.getState().downloadImages(selectedUrls);
   };
 
@@ -58,6 +58,10 @@ function ImageLibrary() {
     console.log('Moving selected images:', selectedImages);
   };
 
+    const handleAddFolder = () => {
+        console.log("Add Folder clicked");
+    }
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
@@ -69,7 +73,7 @@ function ImageLibrary() {
         <div className="w-64 bg-white rounded-lg shadow-sm p-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold">Folders</h2>
-            <button className="text-blue-600 hover:text-blue-800">
+            <button onClick={handleAddFolder} className="text-blue-600 hover:text-blue-800">
               <FolderPlus size={20} />
             </button>
           </div>
@@ -101,7 +105,7 @@ function ImageLibrary() {
                   className="w-full pl-4 pr-10 py-2 border rounded-md"
                 />
               </div>
-              
+
               {selectedImages.length > 0 && (
                 <div className="flex space-x-4">
                   <button

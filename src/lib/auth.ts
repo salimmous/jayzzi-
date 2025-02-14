@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { supabase } from './supabase';
-import { useSettingsStore } from './settings';
+import { supabase } from './supabase.ts'; // .ts extension
+import { useSettingsStore } from './settings.ts'; // .ts extension
 
 interface User {
   id: string;
@@ -16,6 +16,7 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>; // Add resetPassword
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -28,14 +29,14 @@ export const useAuthStore = create<AuthState>()(
       checkAuth: async () => {
         try {
           const { data: { session }, error } = await supabase.auth.getSession();
-          
+
           if (error) throw error;
-          
+
           if (session?.user) {
             // Load settings after successful authentication
             await useSettingsStore.getState().loadSettings();
 
-            set({ 
+            set({
               user: {
                 id: session.user.id,
                 email: session.user.email!,
@@ -47,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
             set({ user: null, loading: false });
           }
         } catch (error) {
-          set({ 
+          set({
             error: (error as Error).message,
             user: null,
             loading: false
@@ -58,7 +59,7 @@ export const useAuthStore = create<AuthState>()(
       signIn: async (email: string, password: string) => {
         try {
           set({ loading: true, error: null });
-          
+
           const { data: { session }, error } = await supabase.auth.signInWithPassword({
             email,
             password
@@ -70,7 +71,7 @@ export const useAuthStore = create<AuthState>()(
             // Load settings after successful login
             await useSettingsStore.getState().loadSettings();
 
-            set({ 
+            set({
               user: {
                 id: session.user.id,
                 email: session.user.email!,
@@ -99,7 +100,21 @@ export const useAuthStore = create<AuthState>()(
         } finally {
           set({ loading: false });
         }
-      }
+      },
+      resetPassword: async (email: string) => {
+        try {
+          set({ loading: true, error: null });
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/update-password`,
+          });
+          if (error) throw error;
+        } catch (error) {
+          set({ error: (error as Error).message });
+          throw error;
+        } finally {
+          set({ loading: false });
+        }
+      },
     }),
     {
       name: 'auth-storage',

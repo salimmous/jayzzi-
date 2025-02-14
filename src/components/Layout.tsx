@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  FileText, 
-  Image, 
-  Library, 
+import {
+  FileText,
+  Image,
+  Library,
   PenTool,
   Search,
   Tag,
   Settings,
-  X
+  X,
+  BarChart,
+  Calendar as CalendarIcon, // Rename the Calendar icon
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -34,6 +36,9 @@ const sidebarItems: SidebarItem[] = [
   { section: 'Keywords', icon: null, label: '', path: '' },
   { icon: <Search size={20} />, label: 'Keyword Research', path: '/keywords/research' },
   { icon: <Tag size={20} />, label: 'Keyword Tracker', path: '/keywords/tracker' },
+  { icon: <Settings size={20} />, label: 'Settings', path: '/settings' },
+  { icon: <BarChart size={20} />, label: 'Analytics', path: '/analytics' },
+  { icon: <CalendarIcon size={20} />, label: 'Calendar', path: '/calendar' }, // Add Calendar link
 ];
 
 interface LayoutProps {
@@ -43,7 +48,6 @@ interface LayoutProps {
 function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [user] = React.useState({ name: 'Musfiq', avatar: '👋' });
-  const [showSettings, setShowSettings] = useState(false);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -66,8 +70,8 @@ function Layout({ children }: LayoutProps) {
                 key={item.path}
                 to={item.path}
                 className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors
-                  ${location.pathname === item.path 
-                    ? 'bg-blue-50 text-blue-600' 
+                  ${location.pathname === item.path
+                    ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-50'}`}
               >
                 {item.icon}
@@ -76,7 +80,7 @@ function Layout({ children }: LayoutProps) {
             )
           ))}
         </nav>
-        
+
         {/* User Profile */}
         <div className="absolute bottom-0 w-64 p-4 border-t border-gray-200">
           <div className="flex items-center">
@@ -87,12 +91,6 @@ function Layout({ children }: LayoutProps) {
               <p className="text-sm font-medium text-gray-700">Hello {user.name}</p>
               <p className="text-xs text-gray-500">Admin</p>
             </div>
-            <button 
-              onClick={() => setShowSettings(true)}
-              className="ml-auto p-1 text-gray-400 hover:text-gray-500"
-            >
-              <Settings size={16} />
-            </button>
           </div>
         </div>
       </aside>
@@ -103,94 +101,6 @@ function Layout({ children }: LayoutProps) {
           {children}
         </div>
       </main>
-
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-md p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Settings</h2>
-              <button 
-                onClick={() => setShowSettings(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* API Settings */}
-              <div>
-                <h3 className="text-lg font-medium mb-2">API Configuration</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      OpenAI API Key
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full px-3 py-2 border rounded-md"
-                      placeholder="Enter API key"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Midjourney API Key
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full px-3 py-2 border rounded-md"
-                      placeholder="Enter API key"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* WordPress Settings */}
-              <div>
-                <h3 className="text-lg font-medium mb-2">WordPress Integration</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      WordPress URL
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-2 border rounded-md"
-                      placeholder="https://your-site.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      API Token
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full px-3 py-2 border rounded-md"
-                      placeholder="Enter WordPress API token"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-4 pt-4 border-t">
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

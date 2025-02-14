@@ -28,6 +28,8 @@ export interface Article {
   createdAt: Date;
   updatedAt: Date;
   wordpressDraft: boolean;
+  wordpressPostId?: string; // Add WordPress post ID
+  wordpressUrl?: string; // Add WordPress URL
 }
 
 export interface PinData {
@@ -62,4 +64,40 @@ export interface PinMetrics {
   reactions: number;
   comments: number;
   createdAt: Date;
+}
+
+// Calendar Event Type
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  type: 'article' | 'pin';
+  status: 'scheduled' | 'draft' | 'published';
+  articleId?: string; // Link to article
+  pinId?: string; // Link to pin
+}
+
+// Analytics Data Types (Placeholders)
+export interface ArticleAnalytics {
+  articleId: string;
+  views: number;
+  shares: number;
+  comments: number;
+  timeSpent: number;
+}
+
+export interface PinAnalytics {
+  pinId: string;
+  impressions: number;
+  saves: number;
+  clicks: number;
+  outboundClicks: number;
+}
+
+export interface KeywordAnalytics {
+  keywordId: string;
+  searchVolume: number;
+  ranking: number;
+  ctr: number;
 }

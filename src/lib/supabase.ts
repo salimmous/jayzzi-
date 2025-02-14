@@ -11,7 +11,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    storage: window.localStorage
+    storage: window.localStorage,
+    detectSessionInUrl: true,
   }
 });
 
@@ -20,7 +21,7 @@ export const initializeAuth = async () => {
   try {
     // First check if we're already authenticated
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session) {
       // Try to sign in with default credentials
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -47,7 +48,7 @@ export const initializeAuth = async () => {
         }
       }
     }
-    
+
     return true;
   } catch (error) {
     console.error('Auth initialization error:', error);

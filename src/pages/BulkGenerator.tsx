@@ -16,7 +16,7 @@ interface BulkFormData {
 }
 
 function BulkGenerator() {
-  const { register, handleSubmit, watch } = useForm<BulkFormData>({
+  const { register, handleSubmit, watch, setValue } = useForm<BulkFormData>({
     defaultValues: {
       sections: [{ title: '' }],
       model: 'ideogram',
@@ -29,6 +29,7 @@ function BulkGenerator() {
   const onSubmit = (data: BulkFormData) => {
     const titles = data.titles.split('\n').filter(title => title.trim());
     console.log({ ...data, titles });
+    // Placeholder: In a real application, you would send this data to an API
   };
 
   return (
@@ -79,6 +80,7 @@ function BulkGenerator() {
             onClick={() => {
               const sections = watch('sections');
               sections.push({ title: '' });
+              setValue('sections', sections);
             }}
             className="mt-4 px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
           >
